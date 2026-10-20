@@ -12,10 +12,12 @@
 
 {{-- Top bar --}}
 <nav class="bg-brand-800 text-white sticky top-0 z-30 shadow" style="padding-top: env(safe-area-inset-top)">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-2 min-w-0">
-            <x-application-logo class="w-8 h-8 shrink-0" />
-            <span class="font-semibold truncate">MD Biocoals <span class="font-normal text-brand-200 hidden sm:inline">· Onboarding</span></span>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 min-w-0">
+            <span class="shrink-0 bg-white rounded-lg px-2 py-1 shadow-sm">
+                <x-application-logo class="h-12 w-auto" />
+            </span>
+            <span class="font-semibold truncate hidden sm:inline">MD Biocoals <span class="font-normal text-brand-200">· Onboarding</span></span>
         </a>
 
         <div class="hidden md:flex items-center gap-1">

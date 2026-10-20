@@ -8,6 +8,10 @@
 
         <title>Log in · {{ config('app.name') }}</title>
 
+        <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
 
@@ -15,13 +19,13 @@
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col justify-center items-center px-4 py-10 bg-gradient-to-b from-brand-800 to-brand-950">
-            <div class="flex flex-col items-center text-white mb-6">
-                <x-application-logo class="w-16 h-16" />
-                <h1 class="mt-3 text-2xl font-bold">MD Biocoals</h1>
-                <p class="text-brand-200 text-sm">Dealer &amp; Distributor Onboarding</p>
-            </div>
-
             <div class="w-full max-w-sm px-6 py-6 bg-white shadow-xl rounded-2xl">
+                <div class="flex flex-col items-center mb-6">
+                    <x-application-logo class="w-56 max-w-full h-auto" />
+                    <h1 class="sr-only">MD Biocoals</h1>
+                    <p class="mt-3 text-sm font-medium text-gray-500">Dealer &amp; Distributor Onboarding</p>
+                </div>
+
                 {{ $slot }}
             </div>
 
