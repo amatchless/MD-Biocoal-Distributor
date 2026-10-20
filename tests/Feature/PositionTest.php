@@ -40,6 +40,8 @@ class PositionTest extends TestCase
         $this->assertSame(['User', 'TM', 'AM', 'Manager', 'Director'], Position::forDepartment($this->dept('HR'))->pluck('abbreviation')->all());
         $this->assertSame(['SO', 'AASM', 'ASM', 'RM', 'ZM', 'NH', 'Director'], Position::forDepartment($this->dept('Sales'))->pluck('abbreviation')->all());
         $this->assertSame('Sales Officer (SO)', $this->position('SO', $this->dept('Sales'))->label());
+        $this->assertSame('Team Manager (TM)', $this->position('TM')->label());
+        $this->assertSame('Assistant Manager (AM)', $this->position('AM')->label());
     }
 
     public function test_the_form_offers_each_department_its_own_positions(): void

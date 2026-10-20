@@ -18,8 +18,8 @@ class Position extends Model
     /** The standard ladder, junior to senior: [name, abbreviation]. */
     public const STANDARD = [
         ['User', 'User'],
-        ['TM', 'TM'],
-        ['AM', 'AM'],
+        ['Team Manager', 'TM'],
+        ['Assistant Manager', 'AM'],
         ['Manager', 'Manager'],
         ['Director', 'Director'],
     ];
