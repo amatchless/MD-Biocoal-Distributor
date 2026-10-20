@@ -44,6 +44,15 @@
                 @if ($managers->isEmpty())<p class="mt-1 text-sm text-amber-700">Add a manager first, then assign employees to them.</p>@endif
             </div>
 
+            <x-field label="Department" name="department_id">
+                <select id="department_id" name="department_id" class="input">
+                    <option value="">No department</option>
+                    @foreach ($departments as $d)
+                        <option value="{{ $d->id }}" @selected(old('department_id', $user->department_id) == $d->id)>{{ $d->name }}</option>
+                    @endforeach
+                </select>
+            </x-field>
+
             <x-field label="Territory / region" name="territory">
                 <input id="territory" name="territory" class="input" value="{{ old('territory', $user->territory) }}" placeholder="e.g. Nadia district">
             </x-field>

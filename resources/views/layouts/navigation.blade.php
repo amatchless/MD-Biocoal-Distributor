@@ -6,6 +6,7 @@
     ];
     if ($user->isSuperAdmin()) {
         $links[] = ['route' => 'users.index', 'match' => 'users.*', 'label' => 'Users', 'icon' => 'M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 9v-1a4 4 0 0 0-3-3.87M16 2.13a4 4 0 0 1 0 7.75'];
+        $links[] = ['route' => 'departments.index', 'match' => 'departments.*', 'label' => 'Departments', 'icon' => 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6'];
     }
 @endphp
 
@@ -39,6 +40,9 @@
             </x-slot>
             <x-slot name="content">
                 <div class="px-4 py-2 text-xs text-gray-500 sm:hidden">{{ $user->name }} · {{ $user->roleLabel() }}</div>
+                @if ($user->isSuperAdmin())
+                    <x-dropdown-link :href="route('departments.index')" class="md:hidden">Departments</x-dropdown-link>
+                @endif
                 <x-dropdown-link :href="route('profile.edit')">Profile & password</x-dropdown-link>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
@@ -51,7 +55,7 @@
 
 {{-- Bottom tab bar on phones --}}
 <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-200" style="padding-bottom: env(safe-area-inset-bottom)">
-    <div class="grid {{ count($links) === 3 ? 'grid-cols-4' : 'grid-cols-3' }} h-16 text-xs">
+    <div class="grid {{ count($links) >= 3 ? 'grid-cols-4' : 'grid-cols-3' }} h-16 text-xs">
         @foreach (array_slice($links, 0, 2) as $link)
             <a href="{{ route($link['route']) }}" class="flex flex-col items-center justify-center gap-1 {{ request()->routeIs($link['match']) ? 'text-brand-700 font-semibold' : 'text-gray-500' }}">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="{{ $link['icon'] }}"/></svg>
@@ -62,7 +66,7 @@
             <span class="w-10 h-10 -mt-1 rounded-full bg-brand-700 text-white grid place-items-center text-2xl leading-none shadow">+</span>
             Onboard
         </a>
-        @if (count($links) === 3)
+        @if (count($links) >= 3)
             <a href="{{ route($links[2]['route']) }}" class="flex flex-col items-center justify-center gap-1 {{ request()->routeIs($links[2]['match']) ? 'text-brand-700 font-semibold' : 'text-gray-500' }}">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="{{ $links[2]['icon'] }}"/></svg>
                 {{ $links[2]['label'] }}

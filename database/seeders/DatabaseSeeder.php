@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             Role::findOrCreate($role, 'web');
         }
 
+        $this->call(DepartmentSeeder::class);
+
         $email = env('ADMIN_EMAIL', 'admin@mdbiocoals.com');
         $admin = User::firstOrCreate(
             ['email' => $email],

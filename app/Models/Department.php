@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+#[Fillable(['name'])]
+class Department extends Model
+{
+    /** The departments every install starts with. */
+    public const DEFAULTS = [
+        'HR', 'Liasioning', 'Account', 'Media', 'Inventory', 'Labour', 'Production', 'RnD',
+        'Sales', 'Marketing', 'Quality Control', 'Purchase', 'Dispatch', 'Admin', 'Security',
+    ];
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+}

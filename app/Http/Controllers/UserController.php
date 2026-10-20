@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,20 +16,21 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $users = User::with(['roles', 'manager:id,name'])
+        $users = User::with(['roles', 'manager:id,name', 'department:id,name'])
             ->withCount('onboardedDealers')
             ->when($request->query('role'), fn ($q, $role) => $q->role($role))
+            ->when($request->query('department'), fn ($q, $d) => $d === 'none' ? $q->whereNull('department_id') : $q->where('department_id', $d))
             ->when($request->query('q'), fn ($q, $s) => $q->where(fn ($w) => $w->where('name', 'like', "%$s%")->orWhere('email', 'like', "%$s%")))
             ->orderBy('name')
             ->paginate(30)
             ->withQueryString();
 
-        return view('users.index', compact('users'));
+        return view('users.index', ['users' => $users, 'departments' => $this->departments()]);
     }
 
     public function create(): View
     {
-        return view('users.form', ['user' => new User(['is_active' => true]), 'managers' => $this->managers()]);
+        return view('users.form', ['user' => new User(['is_active' => true]), 'managers' => $this->managers(), 'departments' => $this->departments()]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -45,7 +47,7 @@ class UserController extends Controller
 
     public function edit(User $user): View
     {
-        return view('users.form', ['user' => $user, 'managers' => $this->managers($user)]);
+        return view('users.form', ['user' => $user, 'managers' => $this->managers($user), 'departments' => $this->departments()]);
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -85,6 +87,7 @@ class UserController extends Controller
                 Rule::exists('users', 'id'),
                 fn ($attr, $value, $fail) => $value && ! User::role(User::MANAGER)->whereKey($value)->exists() ? $fail('Choose a manager.') : null,
             ],
+            'department_id' => ['nullable', Rule::exists('departments', 'id')],
             'territory' => ['nullable', 'string', 'max:80'],
             'is_active' => ['boolean'],
             'password' => [$user ? 'nullable' : 'required', Password::min(8)],
@@ -99,6 +102,11 @@ class UserController extends Controller
         }
 
         return $data;
+    }
+
+    private function departments()
+    {
+        return Department::orderBy('name')->get(['id', 'name']);
     }
 
     private function managers(?User $except = null)
