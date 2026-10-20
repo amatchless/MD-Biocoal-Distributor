@@ -19,4 +19,10 @@ class Department extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    /** Positions specific to this department; empty when it uses the standard ladder. */
+    public function positions(): HasMany
+    {
+        return $this->hasMany(Position::class)->orderBy('display_order');
+    }
 }

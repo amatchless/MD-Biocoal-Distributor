@@ -32,7 +32,7 @@
         @foreach ($users as $u)
             <a href="{{ route('users.edit', $u) }}" class="flex items-center justify-between gap-3 p-3 hover:bg-gray-50">
                 <div class="min-w-0">
-                    <p class="font-medium truncate">{{ $u->name }} @unless($u->is_active)<span class="ml-1 text-xs rounded bg-red-100 text-red-700 px-1.5 py-0.5">Inactive</span>@endunless</p>
+                    <p class="font-medium truncate">{{ $u->name }} <x-position-badge :position="$u->position" class="ml-1" /> @unless($u->is_active)<span class="ml-1 text-xs rounded bg-red-100 text-red-700 px-1.5 py-0.5">Inactive</span>@endunless</p>
                     <p class="text-xs text-gray-500 truncate">{{ $u->email }}@if($u->department) · {{ $u->department->name }}@endif @if($u->manager) · reports to {{ $u->manager->name }}@endif @if($u->territory) · {{ $u->territory }}@endif</p>
                 </div>
                 <div class="text-right shrink-0">

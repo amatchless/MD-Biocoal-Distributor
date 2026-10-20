@@ -32,7 +32,7 @@
                 @endcan
             </div>
             <p class="mt-3 text-xs text-gray-500">
-                Onboarded by <strong>{{ $dealer->creator->name }}</strong>
+                Onboarded by <strong>{{ $dealer->creator->name }}</strong>@if ($dealer->creator->position), {{ $dealer->creator->position->label() }}@endif
                 @if ($dealer->creator->manager) (manager: {{ $dealer->creator->manager->name }}) @endif
                 on {{ local_time($dealer->created_at) }}
             </p>

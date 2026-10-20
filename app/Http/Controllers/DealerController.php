@@ -84,7 +84,7 @@ class DealerController extends Controller
     public function show(Request $request, Dealer $dealer): View
     {
         Gate::authorize('view', $dealer);
-        $dealer->load(['creator.manager', 'reviewer', 'documents', 'activities.user']);
+        $dealer->load(['creator.manager', 'creator.position', 'reviewer', 'documents', 'activities.user']);
 
         $duplicates = Dealer::query()
             ->whereKeyNot($dealer->id)

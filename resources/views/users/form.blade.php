@@ -44,14 +44,32 @@
                 @if ($managers->isEmpty())<p class="mt-1 text-sm text-amber-700">Add a manager first, then assign employees to them.</p>@endif
             </div>
 
-            <x-field label="Department" name="department_id">
-                <select id="department_id" name="department_id" class="input">
-                    <option value="">No department</option>
-                    @foreach ($departments as $d)
-                        <option value="{{ $d->id }}" @selected(old('department_id', $user->department_id) == $d->id)>{{ $d->name }}</option>
-                    @endforeach
-                </select>
-            </x-field>
+            <div class="space-y-4"
+                 x-data="{
+                     positions: @js($positions),
+                     department: @js((string) old('department_id', $user->department_id)),
+                     position: @js((string) old('position_id', $user->position_id)),
+                     get options() { return this.positions[this.department] ?? []; },
+                 }"
+                 x-init="$watch('department', () => { if (! options.some(p => String(p.id) === position)) position = '' })">
+                <x-field label="Department" name="department_id">
+                    <select id="department_id" name="department_id" class="input" x-model="department">
+                        <option value="">No department</option>
+                        @foreach ($departments as $d)
+                            <option value="{{ $d->id }}" @selected(old('department_id', $user->department_id) == $d->id)>{{ $d->name }}</option>
+                        @endforeach
+                    </select>
+                </x-field>
+
+                <x-field label="Position / designation" name="position_id">
+                    <select id="position_id" name="position_id" class="input" x-model="position" :disabled="! department">
+                        <option value="" x-text="department ? 'No position' : 'Choose a department first'">No position</option>
+                        <template x-for="p in options" :key="p.id">
+                            <option :value="String(p.id)" x-text="p.label" :selected="String(p.id) === position"></option>
+                        </template>
+                    </select>
+                </x-field>
+            </div>
 
             <x-field label="Territory / region" name="territory">
                 <input id="territory" name="territory" class="input" value="{{ old('territory', $user->territory) }}" placeholder="e.g. Nadia district">

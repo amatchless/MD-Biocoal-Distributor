@@ -15,7 +15,7 @@
             <div>
                 <h1 class="text-xl font-bold">Hello, {{ \Illuminate\Support\Str::before($user->name, ' ') }}</h1>
                 <p class="text-sm text-gray-500">
-                    {{ $user->roleLabel() }}@if ($user->manager) · reports to {{ $user->manager->name }}@endif
+                    @if ($user->position){{ $user->position->label() }} · @endif{{ $user->roleLabel() }}@if ($user->manager) · reports to {{ $user->manager->name }}@endif
                     @if ($user->isManager()) · team of {{ $team->where(fn ($m) => $m->manager_id === $user->id)->count() }}@endif
                 </p>
             </div>
@@ -82,7 +82,7 @@
                                 @foreach ($team as $m)
                                     <tr>
                                         <td class="py-2">
-                                            <a href="{{ route('dealers.index', ['employee' => $m->id]) }}" class="font-medium hover:text-brand-700">{{ $m->name }}</a>
+                                            <a href="{{ route('dealers.index', ['employee' => $m->id]) }}" class="font-medium hover:text-brand-700">{{ $m->name }}</a> <x-position-badge :position="$m->position" class="ml-1" />
                                             <div class="text-xs text-gray-400">{{ $m->roleLabel() }}@if ($user->isSuperAdmin() && $m->manager) · {{ $m->manager->name }}@endif @if($m->territory) · {{ $m->territory }}@endif</div>
                                         </td>
                                         <td class="py-2 text-right font-semibold">{{ $m->stats['total'] }}</td>

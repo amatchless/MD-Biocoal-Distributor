@@ -39,8 +39,8 @@ class DashboardController extends Controller
         $team = collect();
         if (! $user->isEmployee()) {
             $members = $user->isSuperAdmin()
-                ? User::role([User::EMPLOYEE, User::MANAGER])->with('manager:id,name')->orderBy('name')->get()
-                : $user->teamMembers()->orderBy('name')->get();
+                ? User::role([User::EMPLOYEE, User::MANAGER])->with(['manager:id,name', 'position'])->orderBy('name')->get()
+                : $user->teamMembers()->with('position')->orderBy('name')->get();
 
             $counts = Dealer::query()
                 ->whereIn('created_by', $members->pluck('id'))

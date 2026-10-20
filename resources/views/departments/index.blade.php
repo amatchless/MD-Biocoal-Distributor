@@ -24,7 +24,7 @@
                     <div x-show="open" x-cloak class="border-t border-gray-100 divide-y divide-gray-100">
                         @foreach ($d->users as $u)
                             <a href="{{ route('users.edit', $u) }}" class="flex items-center justify-between gap-2 px-3 py-2 text-sm hover:bg-gray-50">
-                                <span class="truncate">{{ $u->name }} @unless($u->is_active)<span class="ml-1 text-xs rounded bg-red-100 text-red-700 px-1.5 py-0.5">Inactive</span>@endunless</span>
+                                <span class="truncate">{{ $u->name }} <x-position-badge :position="$u->position" class="ml-1" /> @unless($u->is_active)<span class="ml-1 text-xs rounded bg-red-100 text-red-700 px-1.5 py-0.5">Inactive</span>@endunless</span>
                                 <span class="text-xs text-gray-500 shrink-0">{{ $u->roleLabel() }}</span>
                             </a>
                         @endforeach

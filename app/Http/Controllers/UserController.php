@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Department;
+use App\Models\Position;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $users = User::with(['roles', 'manager:id,name', 'department:id,name'])
+        $users = User::with(['roles', 'manager:id,name', 'department:id,name', 'position'])
             ->withCount('onboardedDealers')
             ->when($request->query('role'), fn ($q, $role) => $q->role($role))
             ->when($request->query('department'), fn ($q, $d) => $d === 'none' ? $q->whereNull('department_id') : $q->where('department_id', $d))
@@ -30,7 +31,7 @@ class UserController extends Controller
 
     public function create(): View
     {
-        return view('users.form', ['user' => new User(['is_active' => true]), 'managers' => $this->managers(), 'departments' => $this->departments()]);
+        return view('users.form', ['user' => new User(['is_active' => true]), 'managers' => $this->managers(), 'departments' => $this->departments(), 'positions' => $this->positionsByDepartment()]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -47,7 +48,7 @@ class UserController extends Controller
 
     public function edit(User $user): View
     {
-        return view('users.form', ['user' => $user, 'managers' => $this->managers($user), 'departments' => $this->departments()]);
+        return view('users.form', ['user' => $user, 'managers' => $this->managers($user), 'departments' => $this->departments(), 'positions' => $this->positionsByDepartment()]);
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -88,6 +89,20 @@ class UserController extends Controller
                 fn ($attr, $value, $fail) => $value && ! User::role(User::MANAGER)->whereKey($value)->exists() ? $fail('Choose a manager.') : null,
             ],
             'department_id' => ['nullable', Rule::exists('departments', 'id')],
+            'position_id' => [
+                'nullable',
+                Rule::exists('positions', 'id'),
+                function ($attr, $value, $fail) use ($request) {
+                    if (! $value) {
+                        return;
+                    }
+                    if (! $request->filled('department_id')) {
+                        $fail('Choose a department first.');
+                    } elseif (! Position::forDepartment((int) $request->input('department_id'))->whereKey($value)->exists()) {
+                        $fail('Choose a position from this department.');
+                    }
+                },
+            ],
             'territory' => ['nullable', 'string', 'max:80'],
             'is_active' => ['boolean'],
             'password' => [$user ? 'nullable' : 'required', Password::min(8)],
@@ -107,6 +122,20 @@ class UserController extends Controller
     private function departments()
     {
         return Department::orderBy('name')->get(['id', 'name']);
+    }
+
+    /** Position options for each department id, as the form's dropdown needs them. */
+    private function positionsByDepartment(): array
+    {
+        $all = Position::orderBy('display_order')->get(['id', 'name', 'abbreviation', 'department_id']);
+        $standard = $all->whereNull('department_id');
+        $option = fn (Position $p) => ['id' => $p->id, 'label' => $p->label()];
+
+        return Department::pluck('id')->mapWithKeys(function ($id) use ($all, $standard, $option) {
+            $own = $all->where('department_id', $id);
+
+            return [$id => ($own->isNotEmpty() ? $own : $standard)->values()->map($option)->all()];
+        })->all();
     }
 
     private function managers(?User $except = null)
