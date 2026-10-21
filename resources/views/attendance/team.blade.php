@@ -1,10 +1,10 @@
 @php $user = auth()->user(); @endphp
-<x-app-layout :title="$user->isSuperAdmin() ? 'All attendance' : 'Team attendance'">
+<x-app-layout :title="$user->seesAllAttendance() ? 'All attendance' : 'Team attendance'">
     <div class="flex items-center justify-between gap-3 mb-3">
         <div>
-            <h1 class="text-xl font-bold">{{ $user->isSuperAdmin() ? 'All attendance' : 'Team attendance' }}</h1>
+            <h1 class="text-xl font-bold">{{ $user->seesAllAttendance() ? 'All attendance' : 'Team attendance' }}</h1>
             <p class="text-sm text-gray-500">
-                {{ $user->isSuperAdmin() ? 'Field attendance across all departments.' : 'You and the employees reporting to you.' }}
+                {{ $user->seesAllAttendance() ? 'Field attendance across all departments.' : 'You and the employees reporting to you.' }}
                 {{ $clockedInNow }} clocked in right now.
             </p>
         </div>
@@ -59,7 +59,7 @@
                             <td class="px-4 py-2 whitespace-nowrap">{{ $day['date']->format('D, d M') }}</td>
                             <td class="px-4 py-2">
                                 <span class="font-medium">{{ $day['user']?->name }}</span> <x-position-badge :position="$day['user']?->position" class="ml-1" />
-                                @if ($user->isSuperAdmin() && $day['user']?->department)<div class="text-xs text-gray-400">{{ $day['user']->department->name }}</div>@endif
+                                @if ($user->seesAllAttendance() && $day['user']?->department)<div class="text-xs text-gray-400">{{ $day['user']->department->name }}</div>@endif
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap">{{ $day['first_in'] ? local_time($day['first_in']->created_at, 'h:i A') : '—' }}</td>
                             <td class="px-4 py-2 whitespace-nowrap">

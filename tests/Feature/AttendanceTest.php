@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Attendance;
+use App\Models\Department;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -115,5 +116,37 @@ class AttendanceTest extends TestCase
         $this->actingAs($this->manager)->get("/attendance/{$record->id}/photo")->assertOk();
         $this->actingAs($this->admin)->get("/attendance/{$record->id}/photo")->assertOk();
         $this->actingAs($stranger)->get("/attendance/{$record->id}/photo")->assertForbidden();
+    }
+
+    public function test_hr_department_sees_everyones_attendance_with_filters(): void
+    {
+        Storage::fake('public');
+        $hrDept = Department::where('name', Department::HR)->first();
+        $sales = Department::where('name', 'Sales')->first();
+        $hr = User::factory()->create(['name' => 'Harini HR', 'department_id' => $hrDept->id])->assignRole(User::EMPLOYEE);
+        $other = User::factory()->create(['name' => 'Outsider Olga', 'department_id' => $sales->id])->assignRole(User::EMPLOYEE);
+        $this->punch($this->employee, 'in', ['notes' => 'team note']);
+        $this->punch($other, 'in', ['notes' => 'other note', 'photo' => UploadedFile::fake()->image('selfie.jpg')]);
+
+        $this->actingAs($hr)->get('/attendance')->assertSee('All attendance');
+        $this->actingAs($hr)->get('/attendance/team')
+            ->assertOk()->assertSee('All attendance')->assertSee('All departments')
+            ->assertSee('team note')->assertSee('other note');
+
+        $this->actingAs($hr)->get('/attendance/team?employee='.$other->id)
+            ->assertOk()->assertDontSee('team note')->assertSee('other note');
+        $this->actingAs($hr)->get('/attendance/team?department='.$sales->id)
+            ->assertOk()->assertDontSee('team note')->assertSee('other note');
+
+        $record = Attendance::where('user_id', $other->id)->first();
+        $this->actingAs($hr)->get("/attendance/{$record->id}/photo")->assertOk();
+    }
+
+    public function test_hr_access_does_not_extend_to_other_departments(): void
+    {
+        $sales = Department::where('name', 'Sales')->first();
+        $salesEmployee = User::factory()->create(['department_id' => $sales->id])->assignRole(User::EMPLOYEE);
+
+        $this->actingAs($salesEmployee)->get('/attendance/team')->assertForbidden();
     }
 }

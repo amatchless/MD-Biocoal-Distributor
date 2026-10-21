@@ -30,10 +30,10 @@ class Attendance extends Model
         return $this->belongsTo(User::class);
     }
 
-    /** Attendance of the people whose records this user may see (same reach as onboardings). */
+    /** Attendance of the people whose records this user may see (same reach as onboardings, plus HR sees everyone). */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        $ids = $user->visibleCreatorIds();
+        $ids = $user->visibleAttendanceUserIds();
 
         return $ids === null ? $query : $query->whereIn('user_id', $ids);
     }

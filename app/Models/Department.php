@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['name'])]
 class Department extends Model
 {
+    /** Members of this department see everyone's attendance, like a super admin. */
+    public const HR = 'HR';
+
     /** The departments every install starts with. */
     public const DEFAULTS = [
         'HR', 'Liasioning', 'Account', 'Media', 'Inventory', 'Labour', 'Production', 'RnD',

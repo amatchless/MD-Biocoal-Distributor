@@ -72,10 +72,12 @@ class AttendanceController extends Controller
         ]);
     }
 
-    /** Managers see the people reporting to them; super admins see everyone. */
+    /** Managers see the people reporting to them; super admins and HR see everyone. */
     public function team(Request $request): View
     {
         $user = $request->user();
+        abort_unless($user->canViewTeamAttendance(), 403);
+        $all = $user->seesAllAttendance();
         $tz = config('app.display_timezone');
 
         $filters = $request->validate([
@@ -91,7 +93,7 @@ class AttendanceController extends Controller
         $records = Attendance::visibleTo($user)
             ->betweenLocalDates($filters['from'], $filters['to'])
             ->when($filters['employee'] ?? null, fn ($q, $v) => $q->where('user_id', $v))
-            ->when($user->isSuperAdmin() ? ($filters['department'] ?? null) : null,
+            ->when($all ? ($filters['department'] ?? null) : null,
                 fn ($q, $v) => $q->whereHas('user', fn ($u) => $u->where('department_id', $v)))
             ->with('user:id,name,department_id,position_id', 'user.position', 'user.department:id,name')
             ->limit(5000)
@@ -104,11 +106,11 @@ class AttendanceController extends Controller
             'query' => $request->query(),
         ]);
 
-        $employees = $user->isSuperAdmin()
+        $employees = $all
             ? User::role([User::EMPLOYEE, User::MANAGER])->orderBy('name')->get(['id', 'name'])
             : $user->teamMembers()->orderBy('name')->get(['id', 'name'])->prepend($user);
 
-        $departments = $user->isSuperAdmin() ? Department::orderBy('name')->get(['id', 'name']) : collect();
+        $departments = $all ? Department::orderBy('name')->get(['id', 'name']) : collect();
 
         $clockedInNow = Attendance::visibleTo($user)
             ->whereIn('id', Attendance::visibleTo($user)->selectRaw('max(id)')->groupBy('user_id'))
@@ -121,7 +123,7 @@ class AttendanceController extends Controller
 
     public function photo(Request $request, Attendance $attendance): StreamedResponse
     {
-        $ids = $request->user()->visibleCreatorIds();
+        $ids = $request->user()->visibleAttendanceUserIds();
         abort_unless($ids === null || in_array($attendance->user_id, $ids, true), 403);
         abort_unless($attendance->photo_path && Storage::disk('public')->exists($attendance->photo_path), 404);
 
