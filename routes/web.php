@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DealerController;
 use App\Http\Controllers\DepartmentController;
@@ -19,6 +20,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/dealers/{dealer}/review', [DealerController::class, 'review'])->name('dealers.review');
     Route::post('/dealers/{dealer}/documents', [DealerController::class, 'addDocuments'])->name('dealers.documents.store');
     Route::get('/dealers/{dealer}/documents/{document}', [DealerController::class, 'document'])->name('dealers.documents.show');
+
+    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+    Route::get('/attendance/team', [AttendanceController::class, 'team'])
+        ->middleware('role:'.User::MANAGER.'|'.User::SUPER_ADMIN)->name('attendance.team');
+    Route::get('/attendance/{attendance}/photo', [AttendanceController::class, 'photo'])->name('attendance.photo');
 
     Route::middleware('role:'.User::SUPER_ADMIN)->group(function () {
         Route::resource('users', UserController::class)->except(['show', 'destroy']);

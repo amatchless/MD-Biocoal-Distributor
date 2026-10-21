@@ -30,6 +30,8 @@
             <span class="text-3xl leading-none">+</span>
         </a>
 
+        @include('attendance._clock')
+
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
             @foreach ($tiles as $t)
                 <a href="{{ $t['href'] ?? route('dealers.index') }}" class="bg-white rounded-xl border border-gray-200 p-4 hover:border-brand-300">

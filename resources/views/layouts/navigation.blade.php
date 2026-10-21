@@ -3,6 +3,7 @@
     $links = [
         ['route' => 'dashboard', 'match' => 'dashboard', 'label' => 'Home', 'icon' => 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5Z'],
         ['route' => 'dealers.index', 'match' => 'dealers.index', 'label' => $user->isEmployee() ? 'My onboardings' : 'Dealers', 'icon' => 'M4 6h16M4 12h16M4 18h10'],
+        ['route' => 'attendance.index', 'match' => 'attendance.*', 'label' => 'Attendance', 'icon' => 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
     ];
     if ($user->isSuperAdmin()) {
         $links[] = ['route' => 'users.index', 'match' => 'users.*', 'label' => 'Users', 'icon' => 'M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 9v-1a4 4 0 0 0-3-3.87M16 2.13a4 4 0 0 1 0 7.75'];
@@ -43,6 +44,7 @@
             <x-slot name="content">
                 <div class="px-4 py-2 text-xs text-gray-500 sm:hidden">{{ $user->name }} · {{ $user->roleLabel() }}</div>
                 @if ($user->isSuperAdmin())
+                    <x-dropdown-link :href="route('users.index')" class="md:hidden">Users</x-dropdown-link>
                     <x-dropdown-link :href="route('departments.index')" class="md:hidden">Departments</x-dropdown-link>
                 @endif
                 <x-dropdown-link :href="route('profile.edit')">Profile & password</x-dropdown-link>
