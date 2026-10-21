@@ -72,7 +72,8 @@
             <p class="text-sm text-gray-600">Fill in every section and upload your documents. You can <strong>save</strong> and come back to this link later, until {{ local_time($o->access_expires_at, 'd M Y') }}. Press <strong>Submit</strong> when everything is ready.</p>
 
             <form method="POST" action="{{ route('candidate.save', $token) }}" enctype="multipart/form-data" class="space-y-4"
-                  x-data="{ fresher: @js((bool) old('is_fresher', $o->is_fresher)), education: @js(array_values($education)), employment: @js(array_values($employment)) }">
+                  x-data="candidateUpload({ fresher: @js((bool) old('is_fresher', $o->is_fresher)), education: @js(array_values($education)), employment: @js(array_values($employment)) })"
+                  @submit.prevent="send($event)">
                 @csrf
 
                 <x-card title="1. Personal details">
@@ -205,7 +206,13 @@
                                         @endif
                                     </div>
                                 @endforeach
-                                <input type="file" name="files[{{ $cat }}][]" multiple accept="image/*,application/pdf" class="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-brand-800 file:font-medium">
+                                <input type="file" name="files[{{ $cat }}][]" multiple accept="image/*,application/pdf" class="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-brand-800 file:font-medium"
+                                       @change="pick($event)" :disabled="sending">
+                                <template x-for="(f, i) in (selected['files[{{ $cat }}][]'] || [])" :key="i">
+                                    <p class="mt-1 text-xs" :class="f.tooBig ? 'text-red-600' : 'text-gray-500'">
+                                        <span x-text="f.name"></span> · <span x-text="f.size"></span><span x-show="f.tooBig"> · too large, must be under 10 MB</span>
+                                    </p>
+                                </template>
                             </li>
                         @endforeach
                     </ul>
@@ -224,9 +231,25 @@
                     @error('consent')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </x-card>
 
+                <div class="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-900" role="alert" x-show="sendError" x-text="sendError" x-cloak></div>
+
                 <div class="flex gap-2 pb-8">
-                    <button name="action" value="save" class="btn-secondary flex-1">Save for later</button>
-                    <button name="action" value="submit" class="btn-primary flex-[2]" onclick="return confirm('Submit your details to HR? You will not be able to change them afterwards.')">Submit to HR</button>
+                    <button name="action" value="save" class="btn-secondary flex-1" :disabled="sending">Save for later</button>
+                    <button name="action" value="submit" class="btn-primary flex-[2]" :disabled="sending" onclick="return confirm('Submit your details to HR? You will not be able to change them afterwards.')">Submit to HR</button>
+                </div>
+
+                {{-- Upload progress: shown over the page while the form and documents are sent. --}}
+                <div x-show="sending" x-cloak x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-gray-900/50 p-4"
+                     role="dialog" aria-modal="true" aria-labelledby="upload-title">
+                    <div class="w-full max-w-md bg-white rounded-xl shadow-xl p-5">
+                        <p id="upload-title" class="font-semibold" x-text="stage"></p>
+                        <div class="mt-3 h-3 w-full rounded-full bg-gray-200 overflow-hidden"
+                             role="progressbar" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="progress">
+                            <div class="h-full bg-brand-600 transition-[width] duration-200" :class="progress >= 100 && 'animate-pulse'" :style="`width: ${progress}%`"></div>
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500" x-text="detail"></p>
+                        <p class="mt-3 text-sm text-gray-600">Please keep this page open and don't press the button again. On a slow connection this can take a few minutes.</p>
+                    </div>
                 </div>
             </form>
 

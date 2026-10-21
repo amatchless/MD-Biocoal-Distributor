@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\EmployeeOnboarding;
 use App\Models\OnboardingDocument;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,25 @@ class CandidateOnboardingController extends Controller
         return view('candidate.onboarding', ['onboarding' => $onboarding, 'token' => $token]);
     }
 
-    public function save(Request $request, string $token): RedirectResponse
+    /**
+     * The page sends the form in the background to show upload progress. It gets back the URL to reload,
+     * with validation errors and input flashed to the session, so the reloaded page looks as after a normal post.
+     */
+    public function save(Request $request, string $token): RedirectResponse|JsonResponse
+    {
+        try {
+            $response = $this->store($request, $token);
+        } catch (ValidationException $e) {
+            if (! $request->ajax()) {
+                throw $e;
+            }
+            $response = back()->withInput($request->except('bank_account_no'))->withErrors($e->errors());
+        }
+
+        return $request->ajax() ? response()->json(['redirect' => $response->getTargetUrl()]) : $response;
+    }
+
+    private function store(Request $request, string $token): RedirectResponse
     {
         $onboarding = $this->resolve($token);
         abort_unless($onboarding->candidateCanEdit(), 403);
