@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dealer;
+use App\Models\EmployeeOnboarding;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -87,6 +88,17 @@ class DashboardController extends Controller
                 'url' => route('dealers.show', $d),
             ]);
 
-        return view('dashboard', compact('stats', 'recent', 'needsAttention', 'expiring', 'team', 'mapPoints'));
+        $hiring = null;
+        if ($user->canManageOnboarding()) {
+            $n = EmployeeOnboarding::selectRaw('status, count(*) as n')->groupBy('status')->pluck('n', 'status');
+            $hiring = [
+                'with_candidate' => ($n['invited'] ?? 0) + ($n['info_pending'] ?? 0),
+                'to_verify' => $n['under_verification'] ?? 0,
+                'decision' => $n['risk_review'] ?? 0,
+                'overdue' => EmployeeOnboarding::filter(['overdue' => true])->count(),
+            ];
+        }
+
+        return view('dashboard', compact('stats', 'recent', 'needsAttention', 'expiring', 'team', 'mapPoints', 'hiring'));
     }
 }

@@ -5,6 +5,9 @@
         ['route' => 'dealers.index', 'match' => 'dealers.index', 'label' => $user->isEmployee() ? 'My onboardings' : 'Dealers', 'icon' => 'M4 6h16M4 12h16M4 18h10'],
         ['route' => 'attendance.index', 'match' => 'attendance.*', 'label' => 'Attendance', 'icon' => 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
     ];
+    if ($user->canManageOnboarding()) {
+        $links[] = ['route' => 'onboarding.index', 'match' => 'onboarding.*', 'label' => 'New hires', 'icon' => 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10-3v6m3-3h-6'];
+    }
     if ($user->isSuperAdmin()) {
         $links[] = ['route' => 'users.index', 'match' => 'users.*', 'label' => 'Users', 'icon' => 'M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 9v-1a4 4 0 0 0-3-3.87M16 2.13a4 4 0 0 1 0 7.75'];
         $links[] = ['route' => 'departments.index', 'match' => 'departments.*', 'label' => 'Departments', 'icon' => 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6'];
@@ -43,6 +46,9 @@
             </x-slot>
             <x-slot name="content">
                 <div class="px-4 py-2 text-xs text-gray-500 sm:hidden">{{ $user->name }} · {{ $user->roleLabel() }}</div>
+                @if ($user->canManageOnboarding())
+                    <x-dropdown-link :href="route('onboarding.index')" class="md:hidden">New hires</x-dropdown-link>
+                @endif
                 @if ($user->isSuperAdmin())
                     <x-dropdown-link :href="route('users.index')" class="md:hidden">Users</x-dropdown-link>
                     <x-dropdown-link :href="route('departments.index')" class="md:hidden">Departments</x-dropdown-link>
