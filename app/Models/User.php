@@ -114,13 +114,30 @@ class User extends Authenticatable
     /** Super admins and the HR department see every employee's attendance. */
     public function seesAllAttendance(): bool
     {
-        return $this->isSuperAdmin() || $this->department?->name === Department::HR;
+        return $this->isSuperAdmin() || $this->isInHr();
     }
 
     /** Managers see their team's attendance; HR and super admins see everyone's. */
     public function canViewTeamAttendance(): bool
     {
         return $this->isManager() || $this->seesAllAttendance();
+    }
+
+    public function isInHr(): bool
+    {
+        return $this->department?->name === Department::HR;
+    }
+
+    /** Super admins and the HR department run employee onboarding. */
+    public function canManageOnboarding(): bool
+    {
+        return $this->isSuperAdmin() || $this->isInHr();
+    }
+
+    /** The final approve / reject is for super admins and HR managers. */
+    public function canApproveOnboarding(): bool
+    {
+        return $this->isSuperAdmin() || ($this->isInHr() && $this->isManager());
     }
 
     /** IDs of the users whose attendance this user may see, or null for everyone. */

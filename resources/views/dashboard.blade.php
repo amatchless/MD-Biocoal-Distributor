@@ -32,6 +32,16 @@
 
         @include('attendance._clock')
 
+        @if ($hiring)
+            <a href="{{ route('onboarding.index') }}" class="flex flex-wrap items-center justify-between gap-3 bg-white rounded-xl border border-gray-200 p-4 hover:border-brand-300">
+                <span>
+                    <span class="block font-semibold">New hires</span>
+                    <span class="block text-sm text-gray-500">{{ $hiring['with_candidate'] }} with candidates · {{ $hiring['to_verify'] }} to verify · {{ $hiring['decision'] }} awaiting decision</span>
+                </span>
+                @if ($hiring['overdue'])<span class="text-sm font-semibold text-red-700">{{ $hiring['overdue'] }} overdue</span>@endif
+            </a>
+        @endif
+
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
             @foreach ($tiles as $t)
                 <a href="{{ $t['href'] ?? route('dealers.index') }}" class="bg-white rounded-xl border border-gray-200 p-4 hover:border-brand-300">
