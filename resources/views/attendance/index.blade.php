@@ -5,9 +5,9 @@
             <h1 class="text-xl font-bold">Attendance</h1>
             <p class="text-sm text-gray-500">Clock in when you start field work and clock out when you finish.</p>
         </div>
-        @unless ($user->isEmployee())
-            <a href="{{ route('attendance.team') }}" class="btn-secondary py-2 whitespace-nowrap">{{ $user->isSuperAdmin() ? 'All attendance' : 'Team attendance' }}</a>
-        @endunless
+        @if ($user->canViewTeamAttendance())
+            <a href="{{ route('attendance.team') }}" class="btn-secondary py-2 whitespace-nowrap">{{ $user->seesAllAttendance() ? 'All attendance' : 'Team attendance' }}</a>
+        @endif
     </div>
 
     <div class="grid md:grid-cols-5 gap-4 items-start">

@@ -23,8 +23,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
-    Route::get('/attendance/team', [AttendanceController::class, 'team'])
-        ->middleware('role:'.User::MANAGER.'|'.User::SUPER_ADMIN)->name('attendance.team');
+    Route::get('/attendance/team', [AttendanceController::class, 'team'])->name('attendance.team');
     Route::get('/attendance/{attendance}/photo', [AttendanceController::class, 'photo'])->name('attendance.photo');
 
     Route::middleware('role:'.User::SUPER_ADMIN)->group(function () {

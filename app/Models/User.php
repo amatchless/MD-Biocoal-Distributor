@@ -110,4 +110,22 @@ class User extends Authenticatable
 
         return [$this->id];
     }
+
+    /** Super admins and the HR department see every employee's attendance. */
+    public function seesAllAttendance(): bool
+    {
+        return $this->isSuperAdmin() || $this->department?->name === Department::HR;
+    }
+
+    /** Managers see their team's attendance; HR and super admins see everyone's. */
+    public function canViewTeamAttendance(): bool
+    {
+        return $this->isManager() || $this->seesAllAttendance();
+    }
+
+    /** IDs of the users whose attendance this user may see, or null for everyone. */
+    public function visibleAttendanceUserIds(): ?array
+    {
+        return $this->seesAllAttendance() ? null : $this->visibleCreatorIds();
+    }
 }
