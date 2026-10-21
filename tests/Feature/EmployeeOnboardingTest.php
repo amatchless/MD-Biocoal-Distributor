@@ -182,6 +182,27 @@ class EmployeeOnboardingTest extends TestCase
         $this->assertSame('invited', $onboarding->fresh()->status);
     }
 
+    public function test_background_upload_gets_a_reload_url_with_errors_flashed(): void
+    {
+        [$onboarding, $token] = $this->openCase();
+        $ajax = ['X-Requested-With' => 'XMLHttpRequest', 'Accept' => 'application/json'];
+
+        $this->get("/join/$token");
+        $this->post("/join/$token", ['father_name' => 'Suresh Patil', 'aadhaar_last4' => '12341234', 'action' => 'save'], $ajax)
+            ->assertOk()
+            ->assertJson(['redirect' => url("/join/$token")])
+            ->assertSessionHasErrors('aadhaar_last4')
+            ->assertSessionHasInput('father_name', 'Suresh Patil');
+
+        $this->post("/join/$token", $this->candidateDetails() + ['files' => $this->allDocuments(), 'consent' => '1', 'action' => 'submit'], $ajax)
+            ->assertOk()
+            ->assertJson(['redirect' => url("/join/$token")])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('under_verification', $onboarding->fresh()->status);
+        $this->get("/join/$token")->assertSee('sent to HR for verification');
+    }
+
     public function test_aadhaar_accepts_only_the_last_four_digits(): void
     {
         [, $token] = $this->openCase();
